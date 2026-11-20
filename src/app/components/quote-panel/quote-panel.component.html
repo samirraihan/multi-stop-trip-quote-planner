@@ -1,0 +1,46 @@
+<section class="panel" aria-live="polite">
+  <h2>Quote</h2>
+
+  @switch (view().kind) {
+    @case ('idle') {
+      <p class="muted">Fill in the trip and press "Get quote" to see the estimate.</p>
+    }
+    @case ('pending') {
+      <p class="loading"><span class="spinner" aria-hidden="true"></span> Calculating your quote...</p>
+      @if (view().kind === 'pending' && $any(view()).inputsChanged) {
+        <p class="warn">You changed the trip after asking for this quote. The result will be ignored.</p>
+      }
+    }
+    @case ('stale') {
+      <p class="warn">The trip has changed since the last quote. Press "Get quote" again for a new estimate.</p>
+    }
+    @case ('invalid') {
+      <p class="error">The quote could not be created:</p>
+      <ul class="error">
+        @for (issue of $any(view()).issues; track issue.code + issue.field) {
+          <li>{{ issue.message }}</li>
+        }
+      </ul>
+    }
+    @case ('success') {
+      @if (quote(); as q) {
+        <dl class="rows">
+          <dt>Route</dt>
+          <dd>{{ routeText(q) }}</dd>
+          <dt>Trucks</dt>
+          <dd>{{ truckText(q) }}</dd>
+          <dt>Distance</dt>
+          <dd>{{ q.distanceKm }} km</dd>
+          <dt>Fare per truck</dt>
+          <dd>{{ q.farePerTruck | number }} BDT</dd>
+          <dt>Transportation</dt>
+          <dd>{{ q.transportCost | number }} BDT</dd>
+          <dt>Optional services</dt>
+          <dd>{{ q.serviceCost | number }} BDT</dd>
+          <dt class="total">Total</dt>
+          <dd class="total">{{ q.totalQuote | number }} BDT</dd>
+        </dl>
+      }
+    }
+  }
+</section>

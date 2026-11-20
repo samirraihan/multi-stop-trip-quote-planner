@@ -1,0 +1,90 @@
+<div class="layout">
+  <form class="card" [formGroup]="form" (ngSubmit)="requestQuote()" novalidate>
+    <h2>Trip details</h2>
+
+    <div class="field">
+      <label for="pickup">Pickup location</label>
+      <select id="pickup" formControlName="pickup">
+        <option value="">Select pickup</option>
+        @for (loc of locations; track loc.id) {
+          <option [value]="loc.id" [disabled]="isTaken(loc.id, 'pickup')">{{ loc.name }}</option>
+        }
+      </select>
+      @if (showError('pickup'); as msg) { <p class="error">{{ msg }}</p> }
+    </div>
+
+    <fieldset class="field">
+      <legend>Drop-offs (in order, drag to reorder)</legend>
+      <ul cdkDropList class="drops" (cdkDropListDropped)="onDrop($event)" formArrayName="dropoffs">
+        @for (ctrl of dropoffs.controls; track ctrl; let i = $index) {
+          <li cdkDrag class="drop">
+            <span cdkDragHandle class="handle" title="Drag to reorder" aria-label="Drag to reorder">&#9776;</span>
+            <span class="step">{{ i + 1 }}</span>
+            <select [formControlName]="i" [attr.aria-label]="'Drop-off ' + (i + 1)">
+              <option value="">Select drop-off</option>
+              @for (loc of locations; track loc.id) {
+                <option [value]="loc.id" [disabled]="isTaken(loc.id, i)">{{ loc.name }}</option>
+              }
+            </select>
+            <button type="button" class="icon" (click)="moveDropoff(i, i - 1)" [disabled]="i === 0" aria-label="Move up">&uarr;</button>
+            <button type="button" class="icon" (click)="moveDropoff(i, i + 1)" [disabled]="i === dropoffs.length - 1" aria-label="Move down">&darr;</button>
+            <button type="button" class="icon danger" (click)="removeDropoff(i)" [disabled]="dropoffs.length <= minDropoffs" aria-label="Remove drop-off">&times;</button>
+            @if (dropoffError(i); as msg) { <p class="error full">{{ msg }}</p> }
+          </li>
+        }
+      </ul>
+      <button type="button" class="secondary" (click)="addDropoff()" [disabled]="dropoffs.length >= maxDropoffs">
+        Add drop-off
+      </button>
+      <span class="hint">{{ dropoffs.length }} of {{ maxDropoffs }} used</span>
+      @if (duplicateMessage(); as msg) { <p class="error">{{ msg }}</p> }
+    </fieldset>
+
+    <div class="row">
+      <div class="field">
+        <label for="truckCategory">Truck category</label>
+        <select id="truckCategory" formControlName="truckCategory">
+          @for (t of trucks; track t.id) {
+            <option [value]="t.id">{{ t.label }} ({{ t.capacityTonnes }} t)</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="truckCount">Number of trucks</label>
+        <input id="truckCount" type="number" formControlName="truckCount" [min]="minTrucks" [max]="maxTrucks" step="1" />
+        @if (showError('truckCount'); as msg) { <p class="error">{{ msg }}</p> }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="cargoWeight">Total cargo weight (tonnes)</label>
+      <input id="cargoWeight" type="number" formControlName="cargoWeight" min="0" step="0.1" />
+      <span class="hint">{{ capacityHint() }}</span>
+      @if (showError('cargoWeight'); as msg) { <p class="error">{{ msg }}</p> }
+    </div>
+
+    <div class="field">
+      <label for="pickupAt">Pickup date and time</label>
+      <input id="pickupAt" type="datetime-local" formControlName="pickupAt" [min]="minPickup()" />
+      @if (showError('pickupAt'); as msg) { <p class="error">{{ msg }}</p> }
+    </div>
+
+    <fieldset class="field">
+      <legend>Optional services</legend>
+      <label class="check"><input type="checkbox" formControlName="loadingAssistance" /> Loading assistance (600 BDT per truck)</label>
+      <label class="check"><input type="checkbox" formControlName="unloadingAssistance" /> Unloading assistance (400 BDT per truck)</label>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" class="primary" [disabled]="!canRequest()">Get quote</button>
+      <button type="button" class="secondary" (click)="saveDraft()">Save draft</button>
+      <button type="button" class="secondary" (click)="clearDraft()">Clear draft</button>
+    </div>
+    @if (!canRequest()) {
+      <p class="hint">Fix the highlighted fields to enable "Get quote". You can still save an unfinished draft.</p>
+    }
+    @if (draftMessage(); as msg) { <p class="status" role="status">{{ msg }}</p> }
+  </form>
+
+  <app-quote-panel [view]="view()" />
+</div>

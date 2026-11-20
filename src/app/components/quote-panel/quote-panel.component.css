@@ -1,0 +1,13 @@
+.panel { background: #fff; border: 1px solid #d9dee5; border-radius: 8px; padding: 16px 20px; }
+h2 { margin: 0 0 12px; font-size: 1.1rem; }
+.muted { color: #5b6573; }
+.warn { color: #8a5a00; background: #fff6e0; padding: 8px 10px; border-radius: 6px; }
+.error { color: #a3261d; }
+ul.error { padding-left: 20px; margin: 4px 0 0; }
+.loading { display: flex; align-items: center; gap: 8px; }
+.spinner { width: 16px; height: 16px; border: 2px solid #c9d1db; border-top-color: #1f6f78; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.rows { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; margin: 0; }
+.rows dt { color: #5b6573; }
+.rows dd { margin: 0; text-align: right; }
+.total { font-weight: 700; border-top: 1px solid #d9dee5; padding-top: 8px; margin-top: 4px; font-size: 1.05rem; }
